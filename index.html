@@ -339,7 +339,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-shot img { aspect-ratio: 1.414; object-fit: contain; width: 100%; transition: transform 0.4s ease; }
 .hb-shot a:hover img { transform: scale(1.02); }
 .hb-shot a::after {
-  content: "Zväčšiť"; position: absolute; right: 10px; bottom: 10px; font-family: var(--hb-display); font-weight: 700; font-size: 0.85rem;
+  content: "Prelistovať"; position: absolute; right: 10px; bottom: 10px; font-family: var(--hb-display); font-weight: 700; font-size: 0.85rem;
   background: rgba(43, 34, 48, 0.78); color: var(--hb-white); padding: 3px 10px; border-radius: 999px;
 }
 .hb-shot figcaption { font-size: 0.95rem; color: var(--hb-ink-soft); }
@@ -427,11 +427,42 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 
 /* Lightbox + toast */
-.hb-lightbox { border: 0; padding: 0; background: transparent; max-width: min(1200px, 94vw); width: 100%; }
-.hb-lightbox::backdrop { background: rgba(28, 20, 34, 0.82); }
-.hb-lightbox figure { display: grid; gap: 10px; }
-.hb-lightbox img { width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px; background: var(--hb-white); }
-.hb-lightbox figcaption { color: var(--hb-white); font-size: 1rem; }
+.hb-lightbox { border: 0; padding: 54px 0 0; background: transparent; max-width: 96vw; overflow: visible; }
+.hb-lightbox::backdrop { background: rgba(28, 20, 34, 0.86); }
+/* listovanie ako v knihe: strana = polovica obrázka dvojstrany */
+.hb-fb { display: grid; justify-items: center; gap: 10px; }
+.hb-fb-book {
+  position: relative; perspective: 2400px; aspect-ratio: 1.414; cursor: pointer; user-select: none; touch-action: pan-y;
+  width: min(92vw, 1180px, calc((100vh - 150px) * 1.414)); background: var(--hb-white);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.65);
+}
+.hb-fb.is-single .hb-fb-book { aspect-ratio: 0.707; width: min(86vw, calc((100vh - 150px) * 0.707)); }
+.hb-fb-page, .hb-fb-face {
+  position: absolute; top: 0; height: 100%; background-color: var(--hb-white);
+  background-repeat: no-repeat; background-size: 200% 100%;
+}
+.hb-fb-left { left: 0; width: 50%; }
+.hb-fb-right { left: 50%; width: 50%; }
+.hb-fb.is-single .hb-fb-left { display: none; }
+.hb-fb.is-single .hb-fb-right { left: 0; width: 100%; }
+.hb-fb-book::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 28px); width: 56px; z-index: 3; pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 42%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0.1) 58%, rgba(0, 0, 0, 0) 100%);
+}
+.hb-fb.is-single .hb-fb-book::after { display: none; }
+.hb-fb-leaf { position: absolute; top: 0; height: 100%; width: 50%; z-index: 2; transform-style: preserve-3d; display: none; }
+.hb-fb-leaf.is-on { display: block; }
+.hb-fb-leaf.is-fwd { left: 50%; transform-origin: 0 50%; }
+.hb-fb-leaf.is-back { left: 0; transform-origin: 100% 50%; }
+.hb-fb.is-single .hb-fb-leaf { left: 0; width: 100%; transform-origin: 0 50%; }
+.hb-fb-leaf.is-animate { transition: transform 0.75s cubic-bezier(0.32, 0.08, 0.24, 1); }
+.hb-fb-face { left: 0; width: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.08); }
+.hb-fb-back { transform: rotateY(180deg); }
+.hb-fb-face::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.hb-fb-front::after { background: linear-gradient(90deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 24%); }
+.hb-fb-back::after { background: linear-gradient(270deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 24%); }
+.hb-fb-cap { color: var(--hb-white); font-size: 1rem; line-height: 1.45; text-align: center; max-width: 70ch; padding-inline: 12px; }
+.hb-fb-count { font-family: var(--hb-display); font-weight: 700; color: #E3D6F2; font-size: 0.9rem; letter-spacing: 0.08em; }
 .hb-lb-prev, .hb-lb-next {
   position: absolute; top: 42%; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
   background: var(--hb-white); color: var(--hb-ink); font: 700 1.7rem/1 var(--hb-display);
@@ -440,7 +471,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-lb-prev { left: 10px; }
 .hb-lb-next { right: 10px; }
 .hb-lb-close {
-  position: absolute; top: 10px; right: 10px; font-family: var(--hb-display); font-weight: 800; font-size: 1rem;
+  position: absolute; top: 6px; right: 4px; font-family: var(--hb-display); font-weight: 800; font-size: 1rem;
   background: var(--hb-white); color: var(--hb-ink); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer;
 }
 .hb-toast {
@@ -873,36 +904,113 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   }
 
   // Zväčšenie ukážok
-  var dialog, cur = 0;
-  var shots = Array.prototype.slice.call(root.querySelectorAll("[data-hb-zoom]"));
-  function showShot(i) {
-    cur = (i + shots.length) % shots.length;
-    var link = shots[cur], img = link.querySelector("img"), cap = link.parentNode.querySelector("figcaption");
-    dialog.querySelector("img").src = link.getAttribute("href");
-    dialog.querySelector("img").alt = img ? img.alt : "";
-    dialog.querySelector("figcaption").textContent = cap ? cap.textContent : "";
+  // Listovanie ukážok ako v knihe (vlastná implementácia, bez knižnice).
+  // Strana je polovica obrázka dvojstrany; na úzkom displeji sa listuje po jednej strane.
+  var dialog, fb, book, leaf, pgL, pgR, fFront, fBack, capEl, cntEl;
+  var shots = Array.prototype.slice.call(root.querySelectorAll("[data-hb-zoom]")).map(function (a) {
+    var cap = a.parentNode.querySelector("figcaption");
+    return { href: a.getAttribute("href"), cap: cap ? cap.textContent : "", link: a };
+  });
+  var spread = 0, page = 0, busy = false, swiped = false, downX = null;
+  var narrowMq = window.matchMedia ? window.matchMedia("(max-width: 640px)") : null;
+  var calmMq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  function isSingle() { return !!(narrowMq && narrowMq.matches); }
+  function setFace(el, s, side) {
+    if (side < 0 || !shots[s]) { el.style.backgroundImage = "none"; return; }
+    el.style.backgroundImage = 'url("' + shots[s].href + '")';
+    el.style.backgroundPosition = side ? "100% 0" : "0 0";
+  }
+  function render() {
+    var single = isSingle(), s = single ? Math.floor(page / 2) : spread;
+    fb.classList.toggle("is-single", single);
+    if (single) setFace(pgR, s, page % 2); else { setFace(pgL, s, 0); setFace(pgR, s, 1); }
+    capEl.textContent = shots[s].cap;
+    cntEl.textContent = (s + 1) + " / " + shots.length;
+    book.setAttribute("aria-label", "Dvojstrana knihy: " + shots[s].cap);
+    [s - 1, s + 1].forEach(function (k) { if (shots[k]) { var im = new Image(); im.src = shots[k].href; } });
+  }
+  function turn(dir) {
+    if (busy || !fb) return;
+    var single = isSingle(), total = single ? shots.length * 2 : shots.length;
+    var cur = single ? page : spread, nxt = cur + dir;
+    if (nxt < 0 || nxt >= total) return;
+    var apply = function () {
+      if (single) { page = nxt; spread = Math.floor(nxt / 2); } else { spread = nxt; page = nxt * 2; }
+    };
+    if (calmMq && calmMq.matches) { apply(); render(); return; }
+    busy = true;
+    var end;
+    if (single) {
+      leaf.className = "hb-fb-leaf is-on";
+      setFace(fBack, 0, -1);
+      if (dir > 0) { setFace(fFront, Math.floor(cur / 2), cur % 2); setFace(pgR, Math.floor(nxt / 2), nxt % 2); leaf.style.transform = "rotateY(0deg)"; end = "rotateY(-180deg)"; }
+      else { setFace(fFront, Math.floor(nxt / 2), nxt % 2); leaf.style.transform = "rotateY(-180deg)"; end = "rotateY(0deg)"; }
+    } else if (dir > 0) {
+      setFace(fFront, cur, 1); setFace(fBack, nxt, 0); setFace(pgR, nxt, 1);
+      leaf.className = "hb-fb-leaf is-on is-fwd"; leaf.style.transform = "rotateY(0deg)"; end = "rotateY(-180deg)";
+    } else {
+      setFace(fFront, cur, 0); setFace(fBack, nxt, 1); setFace(pgL, nxt, 0);
+      leaf.className = "hb-fb-leaf is-on is-back"; leaf.style.transform = "rotateY(0deg)"; end = "rotateY(180deg)";
+    }
+    void leaf.offsetWidth; // počiatočný stav sa musí vykresliť pred spustením animácie
+    leaf.classList.add("is-animate");
+    leaf.style.transform = end;
+    var done = false;
+    var stop = function () {
+      if (done) return;
+      done = true; apply(); render();
+      leaf.className = "hb-fb-leaf"; leaf.style.transform = ""; busy = false;
+    };
+    leaf.addEventListener("transitionend", stop, { once: true });
+    setTimeout(stop, 1100); // poistka, ak transitionend nepríde
+  }
+  function buildViewer() {
+    dialog = document.createElement("dialog");
+    dialog.className = "hb-lightbox";
+    dialog.setAttribute("aria-label", "Ukážky z knihy");
+    dialog.innerHTML = '<div class="hb-fb"><div class="hb-fb-book" role="img">'
+      + '<div class="hb-fb-page hb-fb-left"></div><div class="hb-fb-page hb-fb-right"></div>'
+      + '<div class="hb-fb-leaf"><div class="hb-fb-face hb-fb-front"></div><div class="hb-fb-face hb-fb-back"></div></div>'
+      + '</div><p class="hb-fb-cap" aria-live="polite"></p><p class="hb-fb-count"></p></div>'
+      + '<button type="button" class="hb-lb-prev" aria-label="Predchádzajúca strana">‹</button>'
+      + '<button type="button" class="hb-lb-next" aria-label="Ďalšia strana">›</button>'
+      + '<button type="button" class="hb-lb-close">Zavrieť</button>';
+    fb = dialog.querySelector(".hb-fb"); book = dialog.querySelector(".hb-fb-book"); leaf = dialog.querySelector(".hb-fb-leaf");
+    pgL = dialog.querySelector(".hb-fb-left"); pgR = dialog.querySelector(".hb-fb-right");
+    fFront = dialog.querySelector(".hb-fb-front"); fBack = dialog.querySelector(".hb-fb-back");
+    capEl = dialog.querySelector(".hb-fb-cap"); cntEl = dialog.querySelector(".hb-fb-count");
+    dialog.addEventListener("click", function (e) {
+      if (e.target === dialog || e.target.classList.contains("hb-lb-close")) { dialog.close(); return; }
+      if (e.target.classList.contains("hb-lb-prev")) { turn(-1); return; }
+      if (e.target.classList.contains("hb-lb-next")) { turn(1); return; }
+      if (book.contains(e.target)) {
+        if (swiped) { swiped = false; return; }
+        var r = book.getBoundingClientRect();
+        turn(e.clientX - r.left > r.width / 2 ? 1 : -1);
+      }
+    });
+    dialog.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); turn(-1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); turn(1); }
+    });
+    book.addEventListener("pointerdown", function (e) { downX = e.clientX; });
+    book.addEventListener("pointerup", function (e) {
+      if (downX === null) return;
+      var dx = e.clientX - downX; downX = null;
+      if (Math.abs(dx) > 40) { swiped = true; turn(dx < 0 ? 1 : -1); }
+    });
+    if (narrowMq && narrowMq.addEventListener) {
+      narrowMq.addEventListener("change", function () { if (dialog.open && !busy) render(); });
+    }
+    root.appendChild(dialog);
   }
   function openShot(link) {
-    if (typeof HTMLDialogElement === "undefined") return false;
-    if (!dialog) {
-      dialog = document.createElement("dialog");
-      dialog.className = "hb-lightbox";
-      dialog.innerHTML = '<figure><img alt=""><figcaption></figcaption></figure>'
-        + '<button type="button" class="hb-lb-prev" aria-label="Predchádzajúca ukážka">‹</button>'
-        + '<button type="button" class="hb-lb-next" aria-label="Ďalšia ukážka">›</button>'
-        + '<button type="button" class="hb-lb-close">Zavrieť</button>';
-      dialog.addEventListener("click", function (e) {
-        if (e.target === dialog || e.target.classList.contains("hb-lb-close")) dialog.close();
-        else if (e.target.classList.contains("hb-lb-prev")) showShot(cur - 1);
-        else if (e.target.classList.contains("hb-lb-next")) showShot(cur + 1);
-      });
-      dialog.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowLeft") { e.preventDefault(); showShot(cur - 1); }
-        if (e.key === "ArrowRight") { e.preventDefault(); showShot(cur + 1); }
-      });
-      root.appendChild(dialog);
-    }
-    showShot(Math.max(0, shots.indexOf(link)));
+    if (typeof HTMLDialogElement === "undefined" || !shots.length) return false;
+    if (!dialog) buildViewer();
+    var idx = 0;
+    for (var k = 0; k < shots.length; k++) if (shots[k].link === link) idx = k;
+    spread = idx; page = idx * 2;
+    render();
     dialog.showModal();
     return true;
   }
