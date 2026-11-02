@@ -436,9 +436,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   width: min(90vw, 1160px, calc((100vh - 170px) * 1.414)); background: var(--hb-white);
 }
 .hb-fb-book.is-dragging { cursor: grabbing; }
-.hb-lightbox[open] .hb-fb-book { animation: hb-book-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-@keyframes hb-book-in { from { transform: translateY(16px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .hb-lightbox[open] .hb-fb-book { animation: none; } }
+.hb-lightbox[open] .hb-fb { animation: hb-book-in 0.3s ease both; }
+@keyframes hb-book-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .hb-lightbox[open] .hb-fb { animation: none; } }
+.hb-fb.is-leaving { opacity: 0; transition: opacity 0.2s ease; }
+/* zatvorená kniha stojí v strede; pri otváraní sa posúva a ľavá polovica sa objavuje */
+.hb-fb:not(.is-single) .hb-fb-book { transform: translateX(calc(-25% * (1 - var(--hb-open, 1)))); }
+.hb-fb.is-opening:not(.is-single) .hb-fb-book::before { left: calc(-12px + 50% * (1 - var(--hb-left, 1))); }
+.hb-fb.is-opening .hb-fb-left, .hb-fb.is-opening .hb-fb-book::after { opacity: var(--hb-lpage, 1); }
+.hb-fb.is-opening:not(.is-single) .hb-fb-book { background: transparent; }
 .hb-fb-book::before {
   content: ""; position: absolute; inset: -9px -12px; z-index: -1; border-radius: 6px;
   background: linear-gradient(90deg, #A884CF, #BC9DE1 47%, #8C68B5 50%, #BC9DE1 53%, #A884CF);
@@ -479,6 +485,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-fb-face { left: 0; width: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .hb-fb-back { transform: rotateY(180deg); }
 .hb-fb.is-single .hb-fb-back { background-color: #F6F2EC; }
+.hb-fb-face.is-cover { background-size: 100% 100%; background-position: 0 0; }
+.hb-fb .hb-fb-face.is-inner { background-color: #BC9DE1; background-image: none; }
 .hb-fb-face::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
 .hb-fb-front::after { background: linear-gradient(90deg, rgba(20, 10, 30, 0.55), rgba(20, 10, 30, 0.15) 45%, rgba(20, 10, 30, 0)); opacity: var(--hb-fs, 0); }
 .hb-fb-back::after { background: linear-gradient(270deg, rgba(20, 10, 30, 0.55), rgba(20, 10, 30, 0.15) 45%, rgba(20, 10, 30, 0)); opacity: var(--hb-bs, 0); }
@@ -939,12 +947,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     var cap = a.parentNode.querySelector("figcaption");
     return { href: a.getAttribute("href"), cap: cap ? cap.textContent : "", link: a };
   });
-  var spread = 0, page = 0, busy = false, state = null, drag = null;
+  var COVER = "assets/obalka-predna.jpg";
+  var spread = 0, page = 0, busy = false, state = null, drag = null, pendingClose = false;
   var narrowMq = window.matchMedia ? window.matchMedia("(max-width: 640px)") : null;
   var calmMq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
   function isSingle() { return !!(narrowMq && narrowMq.matches); }
   function isCalm() { return !!(calmMq && calmMq.matches); }
   function setFace(el, s, side) {
+    el.classList.remove("is-cover", "is-inner");
     if (side < 0 || !shots[s]) { el.style.backgroundImage = "none"; return; }
     el.style.backgroundImage = 'url("' + shots[s].href + '")';
     el.style.backgroundPosition = side ? "100% 0" : "0 0";
@@ -968,6 +978,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     book.style.setProperty("--hb-fs", (Math.min(r / 0.5, 1) * 0.85).toFixed(3));
     book.style.setProperty("--hb-bs", (Math.min((1 - r) / 0.5, 1) * 0.85).toFixed(3));
     book.style.setProperty("--hb-cast", (state.single && state.dir < 0 ? 0.5 * p : 0.6 * (1 - p)).toFixed(3));
+    if (state.kind) { // otváranie alebo zatváranie obálkou
+      book.style.setProperty("--hb-open", p.toFixed(3));
+      book.style.setProperty("--hb-left", Math.max(0, Math.min(1, (p - 0.5) * 2)).toFixed(3));
+      book.style.setProperty("--hb-lpage", Math.max(0, Math.min(1, (p - 0.86) / 0.14)).toFixed(3)); // ľavá strana až pred dopadom obálky
+    }
+  }
+  function coverOn(single) {
+    leaf.className = "hb-fb-leaf is-on" + (single ? "" : " is-fwd");
+    fFront.classList.remove("is-inner"); fFront.classList.add("is-cover");
+    fFront.style.backgroundImage = 'url("' + COVER + '")';
+    if (single) { fBack.classList.add("is-inner"); fBack.style.backgroundImage = "none"; } else setFace(fBack, spread, 0);
+    cast.className = "hb-fb-cast is-fwd";
+    fb.classList.add("is-opening"); book.classList.add("is-turning");
   }
   function beginTurn(dir) {
     if (busy || !fb) return false;
@@ -994,17 +1017,21 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     return true;
   }
   function endTurn(completed) {
-    if (completed) {
+    if (!state) return;
+    if (completed && !state.kind) {
       if (state.single) { page = state.nxt; spread = Math.floor(page / 2); } else { spread = state.nxt; page = spread * 2; }
     }
     render(); // vráti strany pod listom do platného stavu, aj keď sa otáčanie zrušilo
     leaf.className = "hb-fb-leaf"; leaf.style.transform = ""; cast.className = "hb-fb-cast";
     book.classList.remove("is-turning", "is-dragging");
-    ["--hb-fs", "--hb-bs", "--hb-cast"].forEach(function (v) { book.style.removeProperty(v); });
+    ["--hb-fs", "--hb-bs", "--hb-cast", "--hb-open", "--hb-left", "--hb-lpage"].forEach(function (v) { book.style.removeProperty(v); });
+    fb.classList.remove("is-opening");
+    fFront.classList.remove("is-cover"); fBack.classList.remove("is-inner");
     state = null; busy = false;
+    if (pendingClose) { pendingClose = false; closeBook(); }
   }
-  function animateTo(target, done) {
-    var from = state.p, dur = 820 * Math.max(0.35, Math.abs(target - from)), t0 = null, finished = false;
+  function animateTo(target, done, full) {
+    var from = state.p, dur = (full || 820) * Math.max(0.35, Math.abs(target - from)), t0 = null, finished = false;
     var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
     var finish = function () { if (finished) return; finished = true; setProgress(target); done(); };
     var step = function (ts) {
@@ -1021,6 +1048,31 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     if (!beginTurn(dir)) return;
     if (isCalm()) { endTurn(true); return; }
     animateTo(1, function () { endTurn(true); });
+  }
+  // otvorenie: zatvorená kniha s obálkou sa otvorí na vybranej dvojstrane
+  function openCover() {
+    if (isCalm()) return;
+    var single = isSingle();
+    busy = true;
+    state = { kind: "open", dir: 1, single: single, p: 0 };
+    coverOn(single);
+    setProgress(0);
+    setTimeout(function () { if (state && state.kind === "open") animateTo(1, function () { endTurn(true); }, 1150); }, 260);
+  }
+  // zatvorenie: obálka sa zaklapne a kniha zmizne
+  function closeBook() {
+    if (!dialog || !dialog.open) return;
+    if (busy) { pendingClose = true; return; }
+    if (isCalm()) { dialog.close(); return; }
+    var single = isSingle();
+    busy = true;
+    state = { kind: "close", dir: 1, single: single, p: 1 };
+    coverOn(single);
+    setProgress(1);
+    animateTo(0, function () {
+      fb.classList.add("is-leaving");
+      setTimeout(function () { dialog.close(); fb.classList.remove("is-leaving"); endTurn(false); }, 220);
+    }, 950);
   }
   function buildViewer() {
     dialog = document.createElement("dialog");
@@ -1040,10 +1092,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     fFront = dialog.querySelector(".hb-fb-front"); fBack = dialog.querySelector(".hb-fb-back");
     capEl = dialog.querySelector(".hb-fb-cap"); cntEl = dialog.querySelector(".hb-fb-count");
     dialog.addEventListener("click", function (e) {
-      if (e.target === dialog || e.target.classList.contains("hb-lb-close")) { dialog.close(); return; }
+      if (e.target === dialog || e.target.classList.contains("hb-lb-close")) { closeBook(); return; }
       if (e.target.classList.contains("hb-lb-prev")) turn(-1);
       if (e.target.classList.contains("hb-lb-next")) turn(1);
     });
+    dialog.addEventListener("cancel", function (e) { e.preventDefault(); closeBook(); });
     dialog.addEventListener("keydown", function (e) {
       if (e.key === "ArrowLeft") { e.preventDefault(); turn(-1); }
       if (e.key === "ArrowRight") { e.preventDefault(); turn(1); }
@@ -1089,9 +1142,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     if (!dialog) buildViewer();
     var idx = 0;
     for (var k = 0; k < shots.length; k++) if (shots[k].link === link) idx = k;
-    spread = idx; page = idx * 2;
+    spread = idx; page = idx * 2; pendingClose = false;
     render();
     dialog.showModal();
+    openCover();
     return true;
   }
 
