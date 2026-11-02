@@ -325,10 +325,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* Ukážky */
 .hb-gallery-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 40px; margin-bottom: 24px; }
 .hb-gallery-head p { color: var(--hb-ink-soft); max-width: 46ch; }
-.hb-shots { display: grid; grid-auto-flow: column; grid-auto-columns: 86%; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; scrollbar-width: thin; }
+.hb-shots { display: grid; grid-auto-flow: column; grid-auto-columns: 86%; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; scrollbar-width: thin; }
+.hb-shots:focus-visible { outline: 3px solid var(--hb-ochre); outline-offset: 4px; border-radius: 12px; }
+.hb-shots-nav { display: flex; gap: 8px; }
+.hb-shots-nav[hidden] { display: none; }
+.hb-shots-nav button {
+  width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--hb-line); background: var(--hb-white);
+  color: var(--hb-violet); font: 700 1.6rem/1 var(--hb-display); cursor: pointer;
+}
+.hb-shots-nav button:hover { border-color: var(--hb-lavender); background: var(--hb-lilac); }
 .hb-shot { scroll-snap-align: start; display: grid; gap: 10px; min-width: 0; }
-.hb-shot a { display: grid; align-content: center; height: 100%; border-radius: 12px; overflow: hidden; background: var(--hb-white); border: 1px solid var(--hb-line); position: relative; }
-.hb-shot img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; transition: transform 0.4s ease; }
+.hb-shot a { display: grid; align-content: center; border-radius: 12px; overflow: hidden; background: var(--hb-white); border: 1px solid var(--hb-line); position: relative; }
+.hb-shot img { aspect-ratio: 1.414; object-fit: contain; width: 100%; transition: transform 0.4s ease; }
 .hb-shot a:hover img { transform: scale(1.02); }
 .hb-shot a::after {
   content: "Zväčšiť"; position: absolute; right: 10px; bottom: 10px; font-family: var(--hb-display); font-weight: 700; font-size: 0.85rem;
@@ -337,23 +345,27 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-shot figcaption { font-size: 0.95rem; color: var(--hb-ink-soft); }
 .hb-shot figcaption b { color: var(--hb-ink); font-weight: 600; }
 .hb-gallery .mk-note { margin-top: 18px; }
-@container hb (min-width: 860px) {
-  .hb-shots { grid-auto-flow: row; grid-template-columns: 1.6fr 1fr; grid-template-rows: auto auto; overflow: visible; }
-  .hb-shot:first-child { grid-row: span 2; }
+@container hb (min-width: 600px) {
+  .hb-shots { grid-auto-columns: calc((100% - 16px) / 2); }
+}
+@container hb (min-width: 960px) {
+  .hb-shots { grid-auto-columns: calc((100% - 32px) / 3); }
 }
 @media (prefers-reduced-motion: reduce) { .hb-shot img { transition: none; } .hb-shot a:hover img { transform: none; } }
 
 /* Autorky */
 .hb-team { display: grid; gap: 20px; }
 .hb-team-head { display: grid; gap: 14px; align-content: start; min-width: 0; }
-.hb-people { border-top: 2px solid var(--hb-ink); }
-.hb-people li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; padding: 14px 0; border-bottom: 1px solid var(--hb-line); }
-.hb-people b { font-weight: 600; font-size: 1.12rem; line-height: 1.3; }
+.hb-people { display: grid; gap: 18px; }
+.hb-people li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; align-items: center; }
+.hb-people img { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 4px var(--hb-white), 0 0 0 6px var(--hb-lilac); }
+.hb-people b { display: block; font-weight: 600; font-size: 1.08rem; line-height: 1.3; }
 .hb-role { font-family: var(--hb-script); font-size: 0.92rem; color: var(--hb-brick); line-height: 1.9; }
-.hb-bio { font-size: 0.95rem; color: var(--hb-ink-soft); border: 1.5px dashed var(--hb-lavender); background: var(--hb-lilac); border-radius: 10px; padding: 12px 14px; }
 @container hb (min-width: 860px) {
-  .hb-team { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 64px; align-items: start; }
-  .hb-team-head { grid-row: 1 / span 3; }
+  .hb-team { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 64px; align-items: center; }
+  .hb-people { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .hb-people li { grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; text-align: center; gap: 12px; }
+  .hb-people img { width: 132px; height: 132px; }
 }
 
 /* Odborná podpora */
@@ -420,6 +432,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-lightbox figure { display: grid; gap: 10px; }
 .hb-lightbox img { width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px; background: var(--hb-white); }
 .hb-lightbox figcaption { color: var(--hb-white); font-size: 1rem; }
+.hb-lb-prev, .hb-lb-next {
+  position: absolute; top: 42%; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--hb-white); color: var(--hb-ink); font: 700 1.7rem/1 var(--hb-display);
+  box-shadow: 0 4px 14px rgba(28, 20, 34, 0.35);
+}
+.hb-lb-prev { left: 10px; }
+.hb-lb-next { right: 10px; }
 .hb-lb-close {
   position: absolute; top: 10px; right: 10px; font-family: var(--hb-display); font-weight: 800; font-size: 1rem;
   background: var(--hb-white); color: var(--hb-ink); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer;
@@ -526,9 +545,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
               <p class="hb-kicker">O knihe</p>
               <h2 class="hb-h2" id="hb-about-h">Ucelený program, ktorý na Slovensku chýbal</h2>
               <div class="hb-prose">
-                <p>Kniha vznikla pre rodičov detí s&nbsp;ťažkou až veľmi ťažkou poruchou sluchu. Pripravili ju tri klinické logopédky na základe takmer 30&nbsp;rokov práce s&nbsp;deťmi s&nbsp;poruchami sluchu.</p>
-                <p>Rodič v&nbsp;nej nájde jasnú štruktúru: čo robiť v&nbsp;ktorom týždni, ako dieťa viesť krok za krokom a&nbsp;ako rozvíjať hovorenú reč cez sluch pri hre, knižkách, riekankách a&nbsp;piesňach počas bežného dňa.</p>
-                <p>Princípy auditívno-verbálneho prístupu sú súčasťou každodennej práce rodiča s&nbsp;dieťaťom. Program počíta s&nbsp;úzkou spoluprácou rodiny so surdopédom, logopédom alebo klinickým logopédom.</p>
+                <p>Kniha vznikla pre rodičov detí s&nbsp;ťažkou až veľmi ťažkou poruchou sluchu. Dáva im jasnú štruktúru: čo robiť v&nbsp;ktorom týždni a&nbsp;ako rozvíjať hovorenú reč cez sluch pri hre, knižkách, riekankách a&nbsp;piesňach počas bežného dňa.</p>
+                <p>Program počíta s&nbsp;úzkou spoluprácou rodiny so surdopédom, logopédom alebo klinickým logopédom.</p>
               </div>
             </div>
             <div class="hb-facts">
@@ -620,39 +638,65 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
               <h2 class="hb-h2" id="hb-gallery-h">Nahliadnite do knihy</h2>
             </div>
             <p>Formát A4 dáva priestor na prehľadné rozloženie, farebné označenie oblastí a&nbsp;miesto na vlastné poznámky.</p>
+            <div class="hb-shots-nav" hidden>
+              <button type="button" data-dir="-1" aria-label="Predchádzajúce ukážky">‹</button>
+              <button type="button" data-dir="1" aria-label="Ďalšie ukážky">›</button>
+            </div>
           </div>
-          <div class="hb-shots">
+          <div class="hb-shots" tabindex="0" aria-label="Ukážky strán">
             <figure class="hb-shot">
-              <a href="assets/ukazka-tyzden-2.jpg" data-hb-zoom><img src="assets/ukazka-tyzden-2.jpg" width="1800" height="1350" loading="lazy" alt="Dvojstrana 22–23: časti Porozumenie reči a Rečová produkcia v 2. týždni, s cieľmi, aktivitami a tabuľkou na záznam."></a>
-              <figcaption><b>2. týždeň, s. 22–23.</b> Porozumenie reči a&nbsp;rečová produkcia.</figcaption>
+              <a href="assets/ukazka-s146-147.png" data-hb-zoom><img src="assets/ukazka-s146-147.png" width="1254" height="887" loading="lazy" alt="Dvojstrana knihy: 24. týždeň, s. 146–147. Rečová produkcia a výslovnosť."></a>
+              <figcaption><b>24. týždeň, s. 146–147.</b> Rečová produkcia a výslovnosť.</figcaption>
             </figure>
             <figure class="hb-shot">
-              <a href="assets/ukazka-uvod.jpg" data-hb-zoom><img src="assets/ukazka-uvod.jpg" width="1800" height="1350" loading="lazy" alt="Dvojstrana s fialovou úvodnou stranou a textom Úvod na strane 13."></a>
-              <figcaption><b>Úvod, s. 13.</b> Ako s&nbsp;programom pracovať.</figcaption>
+              <a href="assets/ukazka-s148-149.png" data-hb-zoom><img src="assets/ukazka-s148-149.png" width="1262" height="887" loading="lazy" alt="Dvojstrana knihy: 24. a 25. týždeň, s. 148–149. Príbehy, riekanky a piesne; počúvanie."></a>
+              <figcaption><b>24. a 25. týždeň, s. 148–149.</b> Príbehy, riekanky a piesne; počúvanie.</figcaption>
             </figure>
             <figure class="hb-shot">
-              <a href="assets/ukazka-odporucanie.jpg" data-hb-zoom><img src="assets/ukazka-odporucanie.jpg" width="1800" height="1350" loading="lazy" alt="Dvojstrana s poďakovaním a vyjadrením podpory odbornej spoločnosti."></a>
-              <figcaption><b>Podpora vydania.</b> Vyjadrenie odbornej spoločnosti.</figcaption>
+              <a href="assets/ukazka-s170-171.png" data-hb-zoom><img src="assets/ukazka-s170-171.png" width="1267" height="893" loading="lazy" alt="Dvojstrana knihy: 29. týždeň, s. 170–171. Obrázky k aktivitám a porozumenie reči."></a>
+              <figcaption><b>29. týždeň, s. 170–171.</b> Obrázky k aktivitám a porozumenie reči.</figcaption>
+            </figure>
+            <figure class="hb-shot">
+              <a href="assets/ukazka-s178-179.png" data-hb-zoom><img src="assets/ukazka-s178-179.png" width="1259" height="881" loading="lazy" alt="Dvojstrana knihy: 30. týždeň, s. 178–179. Výslovnosť; príbehy, riekanky a piesne."></a>
+              <figcaption><b>30. týždeň, s. 178–179.</b> Výslovnosť; príbehy, riekanky a piesne.</figcaption>
+            </figure>
+            <figure class="hb-shot">
+              <a href="assets/ukazka-s192-193.png" data-hb-zoom><img src="assets/ukazka-s192-193.png" width="1262" height="885" loading="lazy" alt="Dvojstrana knihy: 33. týždeň, s. 192–193. Obrázky k aktivitám a rečová produkcia."></a>
+              <figcaption><b>33. týždeň, s. 192–193.</b> Obrázky k aktivitám a rečová produkcia.</figcaption>
+            </figure>
+            <figure class="hb-shot">
+              <a href="assets/ukazka-s236-237.png" data-hb-zoom><img src="assets/ukazka-s236-237.png" width="1256" height="887" loading="lazy" alt="Dvojstrana knihy: Príloha 1, s. 236–237. Audiometria."></a>
+              <figcaption><b>Príloha 1, s. 236–237.</b> Audiometria.</figcaption>
+            </figure>
+            <figure class="hb-shot">
+              <a href="assets/ukazka-s266-267.png" data-hb-zoom><img src="assets/ukazka-s266-267.png" width="1254" height="888" loading="lazy" alt="Dvojstrana knihy: Príloha 14, s. 266–267. Zoznam zvukov reči."></a>
+              <figcaption><b>Príloha 14, s. 266–267.</b> Zoznam zvukov reči.</figcaption>
+            </figure>
+            <figure class="hb-shot">
+              <a href="assets/ukazka-s272-273.png" data-hb-zoom><img src="assets/ukazka-s272-273.png" width="1257" height="890" loading="lazy" alt="Dvojstrana knihy: Príloha 17, s. 272–273. Precvičovanie výslovnosti hlások, príručka pre rodičov."></a>
+              <figcaption><b>Príloha 17, s. 272–273.</b> Precvičovanie výslovnosti hlások, príručka pre rodičov.</figcaption>
+            </figure>
+            <figure class="hb-shot">
+              <a href="assets/ukazka-s298-299.png" data-hb-zoom><img src="assets/ukazka-s298-299.png" width="1255" height="888" loading="lazy" alt="Dvojstrana knihy: Príloha 24 a slovník, s. 298–299. Výslovnosť hlások; slovník pojmov, skratky a značky."></a>
+              <figcaption><b>Príloha 24 a slovník, s. 298–299.</b> Výslovnosť hlások; slovník pojmov, skratky a značky.</figcaption>
             </figure>
           </div>
-          <span class="mk-note">Ukážky sú skutočné fotografie strán, upravené je iba pozadie a svetlo. Na stránku dáme skeny 4 až 6 strán, ktoré vyberiete.</span>
+          <span class="mk-note">Všetkých 9 ukážok, ktoré ste nám poslali. Ak chcete na stránke len výber, upravíme to.</span>
         </section>
 
         <!-- AUTORKY -->
         <section class="hb-sec hb-wrap" aria-labelledby="hb-team-h">
           <div class="hb-team">
             <div class="hb-team-head">
-              <p class="hb-kicker">Autorky</p>
-              <h2 class="hb-h2" id="hb-team-h">Tri klinické logopédky</h2>
-              <p class="hb-lead">Za stimulačným programom stojí takmer 30&nbsp;rokov práce s&nbsp;deťmi s&nbsp;poruchami sluchu.</p>
+              <p class="hb-kicker">Kto za programom stojí</p>
+              <h2 class="hb-h2" id="hb-team-h">Autorky</h2>
+              <p class="hb-lead">Tri klinické logopedičky z&nbsp;centier kochleárnej implantácie na Slovensku na základe dlhoročných skúseností s&nbsp;prácou s&nbsp;deťmi s&nbsp;poruchami sluchu pripravili stimulačný program <i>Počujem – hovorím – komunikujem: od zvukov k&nbsp;reči cez sluch</i>.</p>
             </div>
             <ul class="hb-people">
-              <li><b>Mgr. Daniela Hudecová, PhD.</b><span class="hb-role">klinická logopédka</span></li>
-              <li><b>Mgr. et Mgr. Silvia Adzimová</b><span class="hb-role">klinická logopédka</span></li>
-              <li><b>Mgr. Miroslava Petrík</b><span class="hb-role">klinická logopédka</span></li>
+              <li><img src="assets/autorka-hudecova.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. Daniela Hudecová, PhD.</b><span class="hb-role">klinická logopédka</span></div></li>
+              <li><img src="assets/autorka-adzimova.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. et Mgr. Silvia Adzimová</b><span class="hb-role">klinická logopédka</span></div></li>
+              <li><img src="assets/autorka-petrik.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. Miroslava Petrík</b><span class="hb-role">klinická logopédka</span></div></li>
             </ul>
-            <p class="hb-bio">Sem pridáme fotografie a&nbsp;krátke medailóny autoriek.</p>
-            <span class="mk-note">Na obálke sú uvedené tri autorky. Ak má stránka uviesť aj ďalších spolupracovníkov, doplníme ich sem.</span>
           </div>
         </section>
 
@@ -745,11 +789,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <section class="mk-todo" aria-labelledby="mk-todo-h">
     <div class="mk-todo-in">
       <h2 id="mk-todo-h">Na dokončenie stránky potrebujeme</h2>
-      <p>Návrh používa iba údaje z&nbsp;obálky a&nbsp;z&nbsp;niekoľkých strán knihy. Ceny, recenzie ani odborné tvrdenia sme si nevymýšľali. Miesta označené „doplníme“ vyplníme podľa vašich podkladov.</p>
+      <p>Návrh používa iba údaje z&nbsp;knihy a&nbsp;podklady, ktoré ste nám poslali. Ceny, recenzie ani odborné tvrdenia sme si nevymýšľali. Miesta označené „doplníme“ vyplníme podľa vašich podkladov.</p>
       <ol>
-        <li>Kontrolu textov a uvedenia autoriek. Ak má stránka uviesť aj ďalších spoluautorov, prosíme o ich mená a roly.</li>
-        <li>Krátky medailón každej autorky (2–3 vety), prípadne fotografiu.</li>
-        <li>Výber 4 až 6 strán, ktoré môžeme ukázať.</li>
+        <li>Kontrolu textov na stránke.</li>
         <li>Konečnú predajnú cenu a termín predaja.</li>
         <li>Súhlas s uvedením citátu a odporúčania odbornej spoločnosti, prípadne ich logá.</li>
         <li>Ak máte krátke video o práci s knihou, pridáme ho aj s titulkami.</li>
@@ -831,24 +873,50 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   }
 
   // Zväčšenie ukážok
-  var dialog;
+  var dialog, cur = 0;
+  var shots = Array.prototype.slice.call(root.querySelectorAll("[data-hb-zoom]"));
+  function showShot(i) {
+    cur = (i + shots.length) % shots.length;
+    var link = shots[cur], img = link.querySelector("img"), cap = link.parentNode.querySelector("figcaption");
+    dialog.querySelector("img").src = link.getAttribute("href");
+    dialog.querySelector("img").alt = img ? img.alt : "";
+    dialog.querySelector("figcaption").textContent = cap ? cap.textContent : "";
+  }
   function openShot(link) {
     if (typeof HTMLDialogElement === "undefined") return false;
     if (!dialog) {
       dialog = document.createElement("dialog");
       dialog.className = "hb-lightbox";
-      dialog.innerHTML = '<figure><img alt=""><figcaption></figcaption></figure><button type="button" class="hb-lb-close">Zavrieť</button>';
+      dialog.innerHTML = '<figure><img alt=""><figcaption></figcaption></figure>'
+        + '<button type="button" class="hb-lb-prev" aria-label="Predchádzajúca ukážka">‹</button>'
+        + '<button type="button" class="hb-lb-next" aria-label="Ďalšia ukážka">›</button>'
+        + '<button type="button" class="hb-lb-close">Zavrieť</button>';
       dialog.addEventListener("click", function (e) {
         if (e.target === dialog || e.target.classList.contains("hb-lb-close")) dialog.close();
+        else if (e.target.classList.contains("hb-lb-prev")) showShot(cur - 1);
+        else if (e.target.classList.contains("hb-lb-next")) showShot(cur + 1);
+      });
+      dialog.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") { e.preventDefault(); showShot(cur - 1); }
+        if (e.key === "ArrowRight") { e.preventDefault(); showShot(cur + 1); }
       });
       root.appendChild(dialog);
     }
-    var img = link.querySelector("img"), cap = link.parentNode.querySelector("figcaption");
-    dialog.querySelector("img").src = link.getAttribute("href");
-    dialog.querySelector("img").alt = img ? img.alt : "";
-    dialog.querySelector("figcaption").textContent = cap ? cap.textContent : "";
+    showShot(Math.max(0, shots.indexOf(link)));
     dialog.showModal();
     return true;
+  }
+
+  // listovanie ukážok šípkami vedľa nadpisu
+  var strip = root.querySelector(".hb-shots"), stripNav = root.querySelector(".hb-shots-nav");
+  if (strip && stripNav) {
+    stripNav.hidden = false;
+    stripNav.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-dir]");
+      if (!b) return;
+      var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      strip.scrollBy({ left: Number(b.getAttribute("data-dir")) * strip.clientWidth * 0.9, behavior: calm ? "auto" : "smooth" });
+    });
   }
 
   root.addEventListener("click", function (e) {
