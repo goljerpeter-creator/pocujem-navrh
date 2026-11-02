@@ -428,41 +428,68 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* Lightbox + toast */
 .hb-lightbox { border: 0; padding: 54px 0 0; background: transparent; max-width: 96vw; overflow: visible; }
-.hb-lightbox::backdrop { background: rgba(28, 20, 34, 0.86); }
-/* listovanie ako v knihe: strana = polovica obrázka dvojstrany */
+.hb-lightbox::backdrop { background: rgba(28, 20, 34, 0.82); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+/* listovanie ako v knihe: strana = polovica obrázka dvojstrany, tvrdá väzba vo farbe knihy */
 .hb-fb { display: grid; justify-items: center; gap: 10px; }
 .hb-fb-book {
-  position: relative; perspective: 2400px; aspect-ratio: 1.414; cursor: pointer; user-select: none; touch-action: pan-y;
-  width: min(92vw, 1180px, calc((100vh - 150px) * 1.414)); background: var(--hb-white);
-  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.65);
+  position: relative; perspective: 2600px; aspect-ratio: 1.414; cursor: grab; user-select: none; touch-action: pan-y;
+  width: min(90vw, 1160px, calc((100vh - 170px) * 1.414)); background: var(--hb-white);
 }
-.hb-fb.is-single .hb-fb-book { aspect-ratio: 0.707; width: min(86vw, calc((100vh - 150px) * 0.707)); }
+.hb-fb-book.is-dragging { cursor: grabbing; }
+.hb-lightbox[open] .hb-fb-book { animation: hb-book-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes hb-book-in { from { transform: translateY(16px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .hb-lightbox[open] .hb-fb-book { animation: none; } }
+.hb-fb-book::before {
+  content: ""; position: absolute; inset: -9px -12px; z-index: -1; border-radius: 6px;
+  background: linear-gradient(90deg, #A884CF, #BC9DE1 47%, #8C68B5 50%, #BC9DE1 53%, #A884CF);
+  box-shadow: 0 34px 70px -24px rgba(0, 0, 0, 0.75);
+}
+.hb-fb.is-single .hb-fb-book { aspect-ratio: 0.707; width: min(84vw, calc((100vh - 170px) * 0.707)); }
+.hb-fb.is-single .hb-fb-book::before { inset: -8px -10px -8px -12px; background: linear-gradient(90deg, #8C68B5, #BC9DE1 16%, #A884CF); }
 .hb-fb-page, .hb-fb-face {
   position: absolute; top: 0; height: 100%; background-color: var(--hb-white);
   background-repeat: no-repeat; background-size: 200% 100%;
 }
-.hb-fb-left { left: 0; width: 50%; }
-.hb-fb-right { left: 50%; width: 50%; }
+.hb-fb-left { left: 0; width: 50%; box-shadow: -1px 0 0 #ECE7DF, -2px 0 0 #FFFFFF, -3px 0 0 #E4DED4, -4px 0 0 #FFFFFF, -5px 0 0 #DCD5C9; }
+.hb-fb-right { left: 50%; width: 50%; box-shadow: 1px 0 0 #ECE7DF, 2px 0 0 #FFFFFF, 3px 0 0 #E4DED4, 4px 0 0 #FFFFFF, 5px 0 0 #DCD5C9; }
 .hb-fb.is-single .hb-fb-left { display: none; }
 .hb-fb.is-single .hb-fb-right { left: 0; width: 100%; }
 .hb-fb-book::after {
-  content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 28px); width: 56px; z-index: 3; pointer-events: none;
+  content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 28px); width: 56px; z-index: 2; pointer-events: none;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 42%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0.1) 58%, rgba(0, 0, 0, 0) 100%);
 }
 .hb-fb.is-single .hb-fb-book::after { display: none; }
-.hb-fb-leaf { position: absolute; top: 0; height: 100%; width: 50%; z-index: 2; transform-style: preserve-3d; display: none; }
+/* nadvihnutý rožok ako nápoveda, že sa dá listovať */
+@media (hover: hover) {
+  .hb-fb-right::after, .hb-fb-left::after {
+    content: ""; position: absolute; bottom: 0; width: 0; height: 0; transition: width 0.25s ease, height 0.25s ease;
+  }
+  .hb-fb-right::after { right: 0; border-top-left-radius: 3px; background: linear-gradient(to top left, #A884CF 0 49%, rgba(0, 0, 0, 0.22) 50%, #EBE5DA 53%, #FDFBF7 100%); }
+  .hb-fb-left::after { left: 0; border-top-right-radius: 3px; background: linear-gradient(to top right, #A884CF 0 49%, rgba(0, 0, 0, 0.22) 50%, #EBE5DA 53%, #FDFBF7 100%); }
+  .hb-fb.can-next .hb-fb-book:hover .hb-fb-right::after { width: 46px; height: 46px; }
+  .hb-fb.can-prev:not(.is-single) .hb-fb-book:hover .hb-fb-left::after { width: 46px; height: 46px; }
+  .hb-fb-book.is-dragging .hb-fb-page::after, .hb-fb-book.is-turning .hb-fb-page::after { width: 0 !important; height: 0 !important; }
+}
+@media (prefers-reduced-motion: reduce) { .hb-fb-right::after, .hb-fb-left::after { transition: none; } }
+.hb-fb-leaf { position: absolute; top: 0; height: 100%; width: 50%; z-index: 3; transform-style: preserve-3d; display: none; will-change: transform; }
 .hb-fb-leaf.is-on { display: block; }
 .hb-fb-leaf.is-fwd { left: 50%; transform-origin: 0 50%; }
 .hb-fb-leaf.is-back { left: 0; transform-origin: 100% 50%; }
 .hb-fb.is-single .hb-fb-leaf { left: 0; width: 100%; transform-origin: 0 50%; }
-.hb-fb-leaf.is-animate { transition: transform 0.75s cubic-bezier(0.32, 0.08, 0.24, 1); }
-.hb-fb-face { left: 0; width: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.08); }
+.hb-fb-face { left: 0; width: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .hb-fb-back { transform: rotateY(180deg); }
+.hb-fb.is-single .hb-fb-back { background-color: #F6F2EC; }
 .hb-fb-face::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
-.hb-fb-front::after { background: linear-gradient(90deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 24%); }
-.hb-fb-back::after { background: linear-gradient(270deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 24%); }
-.hb-fb-cap { color: var(--hb-white); font-size: 1rem; line-height: 1.45; text-align: center; max-width: 70ch; padding-inline: 12px; }
+.hb-fb-front::after { background: linear-gradient(90deg, rgba(20, 10, 30, 0.55), rgba(20, 10, 30, 0.15) 45%, rgba(20, 10, 30, 0)); opacity: var(--hb-fs, 0); }
+.hb-fb-back::after { background: linear-gradient(270deg, rgba(20, 10, 30, 0.55), rgba(20, 10, 30, 0.15) 45%, rgba(20, 10, 30, 0)); opacity: var(--hb-bs, 0); }
+/* tieň, ktorý otáčaná strana vrhá na stranu pod sebou */
+.hb-fb-cast { position: absolute; top: 0; height: 100%; width: 50%; z-index: 2; pointer-events: none; display: none; opacity: var(--hb-cast, 0); }
+.hb-fb-cast.is-fwd { display: block; left: 50%; background: linear-gradient(90deg, rgba(20, 10, 30, 0.5), rgba(20, 10, 30, 0) 60%); }
+.hb-fb-cast.is-back { display: block; left: 0; background: linear-gradient(270deg, rgba(20, 10, 30, 0.5), rgba(20, 10, 30, 0) 60%); }
+.hb-fb.is-single .hb-fb-cast.is-fwd, .hb-fb.is-single .hb-fb-cast.is-back { left: 0; width: 100%; background: linear-gradient(90deg, rgba(20, 10, 30, 0.45), rgba(20, 10, 30, 0) 55%); }
+.hb-fb-cap { color: var(--hb-white); font-size: 1rem; line-height: 1.45; text-align: center; max-width: 70ch; padding-inline: 12px; margin-top: 8px; }
 .hb-fb-count { font-family: var(--hb-display); font-weight: 700; color: #E3D6F2; font-size: 0.9rem; letter-spacing: 0.08em; }
+.hb-fb-hint { color: #BFAFD6; font-size: 0.82rem; }
 .hb-lb-prev, .hb-lb-next {
   position: absolute; top: 42%; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
   background: var(--hb-white); color: var(--hb-ink); font: 700 1.7rem/1 var(--hb-display);
@@ -906,15 +933,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   // Zväčšenie ukážok
   // Listovanie ukážok ako v knihe (vlastná implementácia, bez knižnice).
   // Strana je polovica obrázka dvojstrany; na úzkom displeji sa listuje po jednej strane.
-  var dialog, fb, book, leaf, pgL, pgR, fFront, fBack, capEl, cntEl;
+  // Otáčanie riadi requestAnimationFrame, aby animácia aj ťahanie prstom zdieľali to isté svetlo a tieň.
+  var dialog, fb, book, leaf, cast, pgL, pgR, fFront, fBack, capEl, cntEl;
   var shots = Array.prototype.slice.call(root.querySelectorAll("[data-hb-zoom]")).map(function (a) {
     var cap = a.parentNode.querySelector("figcaption");
     return { href: a.getAttribute("href"), cap: cap ? cap.textContent : "", link: a };
   });
-  var spread = 0, page = 0, busy = false, swiped = false, downX = null;
+  var spread = 0, page = 0, busy = false, state = null, drag = null;
   var narrowMq = window.matchMedia ? window.matchMedia("(max-width: 640px)") : null;
   var calmMq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
   function isSingle() { return !!(narrowMq && narrowMq.matches); }
+  function isCalm() { return !!(calmMq && calmMq.matches); }
   function setFace(el, s, side) {
     if (side < 0 || !shots[s]) { el.style.backgroundImage = "none"; return; }
     el.style.backgroundImage = 'url("' + shots[s].href + '")';
@@ -923,82 +952,133 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   function render() {
     var single = isSingle(), s = single ? Math.floor(page / 2) : spread;
     fb.classList.toggle("is-single", single);
+    fb.classList.toggle("can-prev", single ? page > 0 : spread > 0);
+    fb.classList.toggle("can-next", single ? page < shots.length * 2 - 1 : spread < shots.length - 1);
     if (single) setFace(pgR, s, page % 2); else { setFace(pgL, s, 0); setFace(pgR, s, 1); }
     capEl.textContent = shots[s].cap;
     cntEl.textContent = (s + 1) + " / " + shots.length;
     book.setAttribute("aria-label", "Dvojstrana knihy: " + shots[s].cap);
     [s - 1, s + 1].forEach(function (k) { if (shots[k]) { var im = new Image(); im.src = shots[k].href; } });
   }
-  function turn(dir) {
-    if (busy || !fb) return;
+  function setProgress(p) {
+    state.p = p;
+    var angle = state.single ? (state.dir > 0 ? -180 * p : -180 * (1 - p)) : (state.dir > 0 ? -180 * p : 180 * p);
+    leaf.style.transform = "rotateY(" + angle.toFixed(2) + "deg)";
+    var r = state.single && state.dir < 0 ? 1 - p : p;
+    book.style.setProperty("--hb-fs", (Math.min(r / 0.5, 1) * 0.85).toFixed(3));
+    book.style.setProperty("--hb-bs", (Math.min((1 - r) / 0.5, 1) * 0.85).toFixed(3));
+    book.style.setProperty("--hb-cast", (state.single && state.dir < 0 ? 0.5 * p : 0.6 * (1 - p)).toFixed(3));
+  }
+  function beginTurn(dir) {
+    if (busy || !fb) return false;
     var single = isSingle(), total = single ? shots.length * 2 : shots.length;
     var cur = single ? page : spread, nxt = cur + dir;
-    if (nxt < 0 || nxt >= total) return;
-    var apply = function () {
-      if (single) { page = nxt; spread = Math.floor(nxt / 2); } else { spread = nxt; page = nxt * 2; }
-    };
-    if (calmMq && calmMq.matches) { apply(); render(); return; }
+    if (nxt < 0 || nxt >= total) return false;
     busy = true;
-    var end;
+    state = { dir: dir, single: single, nxt: nxt, p: 0 };
     if (single) {
       leaf.className = "hb-fb-leaf is-on";
       setFace(fBack, 0, -1);
-      if (dir > 0) { setFace(fFront, Math.floor(cur / 2), cur % 2); setFace(pgR, Math.floor(nxt / 2), nxt % 2); leaf.style.transform = "rotateY(0deg)"; end = "rotateY(-180deg)"; }
-      else { setFace(fFront, Math.floor(nxt / 2), nxt % 2); leaf.style.transform = "rotateY(-180deg)"; end = "rotateY(0deg)"; }
+      if (dir > 0) { setFace(fFront, Math.floor(cur / 2), cur % 2); setFace(pgR, Math.floor(nxt / 2), nxt % 2); }
+      else setFace(fFront, Math.floor(nxt / 2), nxt % 2);
     } else if (dir > 0) {
       setFace(fFront, cur, 1); setFace(fBack, nxt, 0); setFace(pgR, nxt, 1);
-      leaf.className = "hb-fb-leaf is-on is-fwd"; leaf.style.transform = "rotateY(0deg)"; end = "rotateY(-180deg)";
+      leaf.className = "hb-fb-leaf is-on is-fwd";
     } else {
       setFace(fFront, cur, 0); setFace(fBack, nxt, 1); setFace(pgL, nxt, 0);
-      leaf.className = "hb-fb-leaf is-on is-back"; leaf.style.transform = "rotateY(0deg)"; end = "rotateY(180deg)";
+      leaf.className = "hb-fb-leaf is-on is-back";
     }
-    void leaf.offsetWidth; // počiatočný stav sa musí vykresliť pred spustením animácie
-    leaf.classList.add("is-animate");
-    leaf.style.transform = end;
-    var done = false;
-    var stop = function () {
-      if (done) return;
-      done = true; apply(); render();
-      leaf.className = "hb-fb-leaf"; leaf.style.transform = ""; busy = false;
+    cast.className = "hb-fb-cast " + (dir > 0 ? "is-fwd" : "is-back");
+    book.classList.add("is-turning");
+    setProgress(0);
+    return true;
+  }
+  function endTurn(completed) {
+    if (completed) {
+      if (state.single) { page = state.nxt; spread = Math.floor(page / 2); } else { spread = state.nxt; page = spread * 2; }
+    }
+    render(); // vráti strany pod listom do platného stavu, aj keď sa otáčanie zrušilo
+    leaf.className = "hb-fb-leaf"; leaf.style.transform = ""; cast.className = "hb-fb-cast";
+    book.classList.remove("is-turning", "is-dragging");
+    ["--hb-fs", "--hb-bs", "--hb-cast"].forEach(function (v) { book.style.removeProperty(v); });
+    state = null; busy = false;
+  }
+  function animateTo(target, done) {
+    var from = state.p, dur = 820 * Math.max(0.35, Math.abs(target - from)), t0 = null, finished = false;
+    var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    var finish = function () { if (finished) return; finished = true; setProgress(target); done(); };
+    var step = function (ts) {
+      if (finished) return;
+      if (t0 === null) t0 = ts;
+      var t = Math.min(1, (ts - t0) / dur);
+      setProgress(from + (target - from) * ease(t));
+      if (t < 1) requestAnimationFrame(step); else finish();
     };
-    leaf.addEventListener("transitionend", stop, { once: true });
-    setTimeout(stop, 1100); // poistka, ak transitionend nepríde
+    requestAnimationFrame(step);
+    setTimeout(finish, dur + 400); // poistka, ak prehliadač nekreslí (napr. karta na pozadí)
+  }
+  function turn(dir) {
+    if (!beginTurn(dir)) return;
+    if (isCalm()) { endTurn(true); return; }
+    animateTo(1, function () { endTurn(true); });
   }
   function buildViewer() {
     dialog = document.createElement("dialog");
     dialog.className = "hb-lightbox";
     dialog.setAttribute("aria-label", "Ukážky z knihy");
     dialog.innerHTML = '<div class="hb-fb"><div class="hb-fb-book" role="img">'
-      + '<div class="hb-fb-page hb-fb-left"></div><div class="hb-fb-page hb-fb-right"></div>'
+      + '<div class="hb-fb-page hb-fb-left"></div><div class="hb-fb-page hb-fb-right"></div><div class="hb-fb-cast"></div>'
       + '<div class="hb-fb-leaf"><div class="hb-fb-face hb-fb-front"></div><div class="hb-fb-face hb-fb-back"></div></div>'
-      + '</div><p class="hb-fb-cap" aria-live="polite"></p><p class="hb-fb-count"></p></div>'
+      + '</div><p class="hb-fb-cap" aria-live="polite"></p><p class="hb-fb-count"></p>'
+      + '<p class="hb-fb-hint">Listujte potiahnutím strany, kliknutím alebo šípkami.</p></div>'
       + '<button type="button" class="hb-lb-prev" aria-label="Predchádzajúca strana">‹</button>'
       + '<button type="button" class="hb-lb-next" aria-label="Ďalšia strana">›</button>'
       + '<button type="button" class="hb-lb-close">Zavrieť</button>';
     fb = dialog.querySelector(".hb-fb"); book = dialog.querySelector(".hb-fb-book"); leaf = dialog.querySelector(".hb-fb-leaf");
+    cast = dialog.querySelector(".hb-fb-cast");
     pgL = dialog.querySelector(".hb-fb-left"); pgR = dialog.querySelector(".hb-fb-right");
     fFront = dialog.querySelector(".hb-fb-front"); fBack = dialog.querySelector(".hb-fb-back");
     capEl = dialog.querySelector(".hb-fb-cap"); cntEl = dialog.querySelector(".hb-fb-count");
     dialog.addEventListener("click", function (e) {
       if (e.target === dialog || e.target.classList.contains("hb-lb-close")) { dialog.close(); return; }
-      if (e.target.classList.contains("hb-lb-prev")) { turn(-1); return; }
-      if (e.target.classList.contains("hb-lb-next")) { turn(1); return; }
-      if (book.contains(e.target)) {
-        if (swiped) { swiped = false; return; }
-        var r = book.getBoundingClientRect();
-        turn(e.clientX - r.left > r.width / 2 ? 1 : -1);
-      }
+      if (e.target.classList.contains("hb-lb-prev")) turn(-1);
+      if (e.target.classList.contains("hb-lb-next")) turn(1);
     });
     dialog.addEventListener("keydown", function (e) {
       if (e.key === "ArrowLeft") { e.preventDefault(); turn(-1); }
       if (e.key === "ArrowRight") { e.preventDefault(); turn(1); }
     });
-    book.addEventListener("pointerdown", function (e) { downX = e.clientX; });
-    book.addEventListener("pointerup", function (e) {
-      if (downX === null) return;
-      var dx = e.clientX - downX; downX = null;
-      if (Math.abs(dx) > 40) { swiped = true; turn(dx < 0 ? 1 : -1); }
+    // ťahanie strany: list ide za prstom, po pustení sa dootočí alebo vráti
+    book.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0 || busy) return;
+      var r = book.getBoundingClientRect();
+      drag = { x: e.clientX, y: e.clientY, t: performance.now(), right: e.clientX - r.left > r.width / 2, w: r.width, id: e.pointerId, active: false };
     });
+    book.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.active) {
+        if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
+        var dir = dx < 0 ? 1 : -1;
+        if (!isSingle() && (dir > 0) !== drag.right) { drag = null; return; }
+        if (!beginTurn(dir)) { drag = null; return; }
+        drag.active = true; book.classList.add("is-dragging");
+        try { book.setPointerCapture(drag.id); } catch (err) { /* staršie prehliadače */ }
+      }
+      setProgress(Math.max(0, Math.min(1, Math.abs(dx) / (isSingle() ? drag.w : drag.w * 0.85))));
+    });
+    var release = function (e, cancelled) {
+      if (!drag) return;
+      var d = drag; drag = null;
+      if (!d.active) { if (!cancelled) turn(d.right ? 1 : -1); return; }
+      var speed = e ? Math.abs(e.clientX - d.x) / Math.max(1, performance.now() - d.t) : 0;
+      var complete = !cancelled && (state.p > 0.35 || speed > 0.6);
+      book.classList.remove("is-dragging");
+      if (isCalm()) { endTurn(complete); return; }
+      animateTo(complete ? 1 : 0, function () { endTurn(complete); });
+    };
+    book.addEventListener("pointerup", function (e) { release(e, false); });
+    book.addEventListener("pointercancel", function () { release(null, true); });
     if (narrowMq && narrowMq.addEventListener) {
       narrowMq.addEventListener("change", function () { if (dialog.open && !busy) render(); });
     }
