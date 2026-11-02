@@ -441,7 +441,26 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (prefers-reduced-motion: reduce) { .hb-lightbox[open] .hb-fb { animation: none; } }
 .hb-fb.is-leaving { opacity: 0; transition: opacity 0.2s ease; }
 /* zatvorená kniha stojí v strede; pri otváraní sa posúva a ľavá polovica sa objavuje */
-.hb-fb:not(.is-single) .hb-fb-book { transform: translateX(calc(-25% * (1 - var(--hb-open, 1)))); }
+.hb-fb-book { transform-origin: 0 0; transform: translate(var(--hb-zx, 0px), var(--hb-zy, 0px)) scale(var(--hb-zs, 1)); }
+.hb-fb:not(.is-single) .hb-fb-book { transform: translate(var(--hb-zx, 0px), var(--hb-zy, 0px)) scale(var(--hb-zs, 1)) translateX(calc(-25% * (1 - var(--hb-open, 1)))); }
+.hb-fb-book.is-zoom-anim { transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) { .hb-fb-book.is-zoom-anim { transition: none; } }
+/* priblíženie: rám okolo knihy oreže zväčšený obsah */
+.hb-fb-view { padding: 9px 12px; border-radius: 8px; }
+.hb-fb.is-zoomed .hb-fb-view { overflow: hidden; }
+.hb-fb.is-zoomed .hb-fb-book { cursor: grab; touch-action: none; }
+.hb-fb.is-zoomed .hb-fb-book.is-panning { cursor: grabbing; }
+.hb-fb.is-zoomed .hb-fb-page::after { display: none; }
+.hb-fb-tools { display: flex; align-items: center; gap: 10px; }
+.hb-fb-tools button {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;
+  background: rgba(255, 255, 255, 0.08); color: var(--hb-white); font: 700 1.25rem/1 var(--hb-display);
+}
+.hb-fb-tools button:hover { background: rgba(255, 255, 255, 0.18); }
+.hb-fb-tools button:disabled { opacity: 0.35; cursor: default; }
+.hb-fb-tools button:focus-visible { outline: 3px solid var(--hb-ochre); outline-offset: 2px; }
+.hb-fb-zoomval { min-width: 3.4em; text-align: center; font-family: var(--hb-display); font-weight: 700; color: #E3D6F2; font-size: 0.9rem; }
+.hb-fb-tools .hb-fb-count { margin-left: 10px; padding-left: 14px; border-left: 1px solid rgba(255, 255, 255, 0.25); }
 .hb-fb.is-opening:not(.is-single) .hb-fb-book::before { left: calc(-12px + 50% * (1 - var(--hb-left, 1))); }
 .hb-fb.is-opening .hb-fb-left, .hb-fb.is-opening .hb-fb-book::after { opacity: var(--hb-lpage, 1); }
 .hb-fb.is-opening:not(.is-single) .hb-fb-book { background: transparent; }
@@ -948,6 +967,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     return { href: a.getAttribute("href"), cap: cap ? cap.textContent : "", link: a };
   });
   var COVER = "assets/obalka-predna.jpg";
+  var ZMAX = 3, PADX = 12, PADY = 9; // PADX/PADY = vnútorný okraj .hb-fb-view
+  var view, zIn, zOut, zVal, zs = 1, zx = 0, zy = 0, pinch = null, pointers = {}, tapTimer = null, lastTap = null;
   var spread = 0, page = 0, busy = false, state = null, drag = null, pendingClose = false;
   var narrowMq = window.matchMedia ? window.matchMedia("(max-width: 640px)") : null;
   var calmMq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
@@ -1044,13 +1065,41 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     requestAnimationFrame(step);
     setTimeout(finish, dur + 400); // poistka, ak prehliadač nekreslí (napr. karta na pozadí)
   }
+  function applyZoom(anim) {
+    book.classList.toggle("is-zoom-anim", !!anim && !isCalm());
+    book.style.setProperty("--hb-zs", zs.toFixed(4));
+    book.style.setProperty("--hb-zx", zx.toFixed(1) + "px");
+    book.style.setProperty("--hb-zy", zy.toFixed(1) + "px");
+    fb.classList.toggle("is-zoomed", zs > 1.001);
+    zVal.textContent = Math.round(zs * 100) + " %";
+    zIn.disabled = zs >= ZMAX - 0.001; zOut.disabled = zs <= 1.001;
+  }
+  function clampPan() {
+    var w = book.offsetWidth, h = book.offsetHeight;
+    zx = Math.min(0, Math.max(w - zs * w, zx));
+    zy = Math.min(0, Math.max(h - zs * h, zy));
+  }
+  function zoomAt(ns, px, py, anim) { // px, py = bod v nezväčšenej knihe, ktorý ostane na mieste
+    ns = Math.max(1, Math.min(ZMAX, ns));
+    var lx = (px - zx) / zs, ly = (py - zy) / zs;
+    zs = ns; zx = px - zs * lx; zy = py - zs * ly;
+    clampPan(); applyZoom(anim);
+  }
+  function resetZoom(anim) { zs = 1; zx = 0; zy = 0; if (book) applyZoom(anim); }
+  function zoomStep(f) { zoomAt(zs * f, book.offsetWidth / 2, book.offsetHeight / 2, true); }
+  function pt(e) {
+    var r = view.getBoundingClientRect();
+    return { x: e.clientX - r.left - PADX, y: e.clientY - r.top - PADY };
+  }
   function turn(dir) {
+    if (zs > 1.001) resetZoom(false);
     if (!beginTurn(dir)) return;
     if (isCalm()) { endTurn(true); return; }
     animateTo(1, function () { endTurn(true); });
   }
   // otvorenie: zatvorená kniha s obálkou sa otvorí na vybranej dvojstrane
   function openCover() {
+    resetZoom(false);
     if (isCalm()) return;
     var single = isSingle();
     busy = true;
@@ -1063,6 +1112,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   function closeBook() {
     if (!dialog || !dialog.open) return;
     if (busy) { pendingClose = true; return; }
+    resetZoom(false);
     if (isCalm()) { dialog.close(); return; }
     var single = isSingle();
     busy = true;
@@ -1078,11 +1128,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     dialog = document.createElement("dialog");
     dialog.className = "hb-lightbox";
     dialog.setAttribute("aria-label", "Ukážky z knihy");
-    dialog.innerHTML = '<div class="hb-fb"><div class="hb-fb-book" role="img">'
+    dialog.innerHTML = '<div class="hb-fb"><div class="hb-fb-view"><div class="hb-fb-book" role="img">'
       + '<div class="hb-fb-page hb-fb-left"></div><div class="hb-fb-page hb-fb-right"></div><div class="hb-fb-cast"></div>'
       + '<div class="hb-fb-leaf"><div class="hb-fb-face hb-fb-front"></div><div class="hb-fb-face hb-fb-back"></div></div>'
-      + '</div><p class="hb-fb-cap" aria-live="polite"></p><p class="hb-fb-count"></p>'
-      + '<p class="hb-fb-hint">Listujte potiahnutím strany, kliknutím alebo šípkami.</p></div>'
+      + '</div></div><p class="hb-fb-cap" aria-live="polite"></p>'
+      + '<div class="hb-fb-tools"><button type="button" class="hb-z-out" aria-label="Oddialiť">−</button>'
+      + '<span class="hb-fb-zoomval">100 %</span><button type="button" class="hb-z-in" aria-label="Priblížiť">+</button>'
+      + '<span class="hb-fb-count"></span></div>'
+      + '<p class="hb-fb-hint">Listujte potiahnutím strany, kliknutím alebo šípkami. Priblížite dvojklikom, kolieskom myši alebo roztiahnutím prstov.</p></div>'
       + '<button type="button" class="hb-lb-prev" aria-label="Predchádzajúca strana">‹</button>'
       + '<button type="button" class="hb-lb-next" aria-label="Ďalšia strana">›</button>'
       + '<button type="button" class="hb-lb-close">Zavrieť</button>';
@@ -1091,25 +1144,77 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     pgL = dialog.querySelector(".hb-fb-left"); pgR = dialog.querySelector(".hb-fb-right");
     fFront = dialog.querySelector(".hb-fb-front"); fBack = dialog.querySelector(".hb-fb-back");
     capEl = dialog.querySelector(".hb-fb-cap"); cntEl = dialog.querySelector(".hb-fb-count");
+    view = dialog.querySelector(".hb-fb-view"); zIn = dialog.querySelector(".hb-z-in"); zOut = dialog.querySelector(".hb-z-out");
+    zVal = dialog.querySelector(".hb-fb-zoomval");
     dialog.addEventListener("click", function (e) {
       if (e.target === dialog || e.target.classList.contains("hb-lb-close")) { closeBook(); return; }
       if (e.target.classList.contains("hb-lb-prev")) turn(-1);
       if (e.target.classList.contains("hb-lb-next")) turn(1);
+      if (e.target === zIn && !busy) zoomStep(1.5);
+      if (e.target === zOut && !busy) zoomStep(1 / 1.5);
     });
     dialog.addEventListener("cancel", function (e) { e.preventDefault(); closeBook(); });
     dialog.addEventListener("keydown", function (e) {
       if (e.key === "ArrowLeft") { e.preventDefault(); turn(-1); }
       if (e.key === "ArrowRight") { e.preventDefault(); turn(1); }
+      if (busy) return;
+      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomStep(1.5); }
+      if (e.key === "-") { e.preventDefault(); zoomStep(1 / 1.5); }
+      if (e.key === "0") { e.preventDefault(); resetZoom(true); }
     });
-    // ťahanie strany: list ide za prstom, po pustení sa dootočí alebo vráti
+    // koliesko myši alebo touchpad: plynulé priblíženie okolo kurzora
+    book.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      if (busy) return;
+      var q = pt(e);
+      zoomAt(zs * Math.exp(-e.deltaY * 0.0015), q.x, q.y, false);
+    }, { passive: false });
+    // ťahanie strany (list ide za prstom), posun pri priblížení, priblíženie dvoma prstami a dvojklik
+    var dist = function (a, b) { return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
     book.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0 || busy) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(pointers);
+      if (ids.length === 2 && !busy) {
+        if (drag && drag.active && !drag.pan) return; // práve sa otáča strana
+        drag = null; clearTimeout(tapTimer); tapTimer = null;
+        var a = pointers[ids[0]], b = pointers[ids[1]];
+        var m = pt({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 });
+        pinch = { d0: dist(a, b), s0: zs, lx: (m.x - zx) / zs, ly: (m.y - zy) / zs };
+        book.classList.remove("is-zoom-anim");
+        return;
+      }
+      if (ids.length > 1 || busy) return;
       var r = book.getBoundingClientRect();
-      drag = { x: e.clientX, y: e.clientY, t: performance.now(), right: e.clientX - r.left > r.width / 2, w: r.width, id: e.pointerId, active: false };
+      drag = {
+        x: e.clientX, y: e.clientY, t: performance.now(), right: e.clientX - r.left > r.width / 2, w: r.width,
+        id: e.pointerId, active: false, pan: zs > 1.001, zx0: zx, zy0: zy
+      };
     });
     book.addEventListener("pointermove", function (e) {
+      if (pointers[e.pointerId]) pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (pinch) {
+        var ids = Object.keys(pointers);
+        if (ids.length < 2) return;
+        var a = pointers[ids[0]], b = pointers[ids[1]];
+        var m = pt({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 });
+        zs = Math.max(1, Math.min(ZMAX, pinch.s0 * dist(a, b) / pinch.d0));
+        zx = m.x - zs * pinch.lx; zy = m.y - zs * pinch.ly;
+        clampPan(); applyZoom(false);
+        return;
+      }
       if (!drag) return;
       var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (drag.pan) {
+        if (!drag.active) {
+          if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+          drag.active = true; book.classList.add("is-panning");
+          try { book.setPointerCapture(drag.id); } catch (err) { /* staršie prehliadače */ }
+        }
+        zx = drag.zx0 + dx; zy = drag.zy0 + dy;
+        clampPan(); applyZoom(false);
+        return;
+      }
       if (!drag.active) {
         if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
         var dir = dx < 0 ? 1 : -1;
@@ -1120,20 +1225,42 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       }
       setProgress(Math.max(0, Math.min(1, Math.abs(dx) / (isSingle() ? drag.w : drag.w * 0.85))));
     });
+    var handleTap = function (e, d) {
+      var now = performance.now();
+      if (lastTap && now - lastTap.t < 300 && Math.abs(e.clientX - lastTap.x) < 30 && Math.abs(e.clientY - lastTap.y) < 30) {
+        clearTimeout(tapTimer); tapTimer = null; lastTap = null;
+        if (zs > 1.001) resetZoom(true); else { var q = pt(e); zoomAt(2.2, q.x, q.y, true); }
+        return;
+      }
+      lastTap = { t: now, x: e.clientX, y: e.clientY };
+      if (d.pan) return; // pri priblížení ťuknutie nelistuje
+      var dir = d.right ? 1 : -1;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(function () { tapTimer = null; turn(dir); }, 280); // počká, či nepríde dvojklik
+    };
     var release = function (e, cancelled) {
+      if (pinch) {
+        if (Object.keys(pointers).length < 2) { pinch = null; if (zs < 1.05) resetZoom(true); }
+        return;
+      }
       if (!drag) return;
       var d = drag; drag = null;
-      if (!d.active) { if (!cancelled) turn(d.right ? 1 : -1); return; }
+      if (d.pan) {
+        book.classList.remove("is-panning");
+        if (!d.active && !cancelled && e) handleTap(e, d);
+        return;
+      }
+      if (!d.active) { if (!cancelled && e) handleTap(e, d); return; }
       var speed = e ? Math.abs(e.clientX - d.x) / Math.max(1, performance.now() - d.t) : 0;
       var complete = !cancelled && (state.p > 0.35 || speed > 0.6);
       book.classList.remove("is-dragging");
       if (isCalm()) { endTurn(complete); return; }
       animateTo(complete ? 1 : 0, function () { endTurn(complete); });
     };
-    book.addEventListener("pointerup", function (e) { release(e, false); });
-    book.addEventListener("pointercancel", function () { release(null, true); });
+    book.addEventListener("pointerup", function (e) { delete pointers[e.pointerId]; release(e, false); });
+    book.addEventListener("pointercancel", function (e) { delete pointers[e.pointerId]; release(null, true); });
     if (narrowMq && narrowMq.addEventListener) {
-      narrowMq.addEventListener("change", function () { if (dialog.open && !busy) render(); });
+      narrowMq.addEventListener("change", function () { if (dialog.open && !busy) { resetZoom(false); render(); } });
     }
     root.appendChild(dialog);
   }
@@ -1143,7 +1270,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     var idx = 0;
     for (var k = 0; k < shots.length; k++) if (shots[k].link === link) idx = k;
     spread = idx; page = idx * 2; pendingClose = false;
+    pointers = {}; pinch = null; drag = null;
     render();
+    resetZoom(false);
     dialog.showModal();
     openCover();
     return true;
