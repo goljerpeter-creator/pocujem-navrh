@@ -345,6 +345,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-price { display: grid; gap: 2px; }
 .hb-price-label { font-family: var(--hb-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.85rem; color: var(--hb-ink-soft); }
 .hb-price .hb-fill { font-size: 1.3rem; }
+.hb-price-value { font-family: var(--hb-display); font-weight: 800; font-size: 1.6rem; line-height: 1.1; color: var(--hb-ink); white-space: nowrap; }
+.hb-price-value small { font-size: 0.55em; font-weight: 600; color: var(--hb-ink-soft); }
 .hb-stock { font-size: 0.98rem; color: var(--hb-ink-soft); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .hb-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--hb-ochre); }
 .hb-stock-sep { color: var(--hb-line); padding-inline: 2px; }
@@ -734,7 +736,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
           <div class="hb-buy">
             <div class="hb-buy-row">
-              <div class="hb-price"><span class="hb-price-label">Cena</span><span class="hb-fill">doplníme</span></div>
+              <div class="hb-price"><span class="hb-price-label">Cena</span><span class="hb-price-value">39&nbsp;€ <small>s&nbsp;DPH</small></span></div>
               <a class="hb-btn" href="#hb-book" data-hb-buy>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
                 Vložiť do košíka
@@ -911,7 +913,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
             </div>
             <ul class="hb-people">
               <li><img src="assets/autorka-hudecova.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. Daniela Hudecová, PhD.</b><span class="hb-role">klinická logopédka</span></div></li>
-              <li><img src="assets/autorka-adzimova.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. et Mgr. Silvia Adzimová</b><span class="hb-role">klinická logopédka</span></div></li>
+              <li><img src="assets/autorka-adzimova.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. et Mgr. Silvia Adzimová, PhD.</b><span class="hb-role">klinická logopédka</span></div></li>
               <li><img src="assets/autorka-petrik.jpg" width="480" height="480" alt="" loading="lazy"><div><b>Mgr. Miroslava Petrík</b><span class="hb-role">klinická logopédka</span></div></li>
             </ul>
           </div>
@@ -926,13 +928,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
               <p>Publikáciu odporúča Sekcia klinickej logopédie Slovenskej spoločnosti pre otorinolaryngológiu a&nbsp;chirurgiu hlavy a&nbsp;krku SLS.</p>
               <p>Vydanie podporila SSO – Slovenská spoločnosť pre otorinolaryngológiu a&nbsp;chirurgiu hlavy a&nbsp;krku SLS. Vyjadrenie podpory podpísala MUDr.&nbsp;Katarína Obtulovičová, PhD., predsedníčka SSO.</p>
               <p class="hb-small">Autorský tím ďakuje občianskemu združeniu ENT Studio za podporu pri vydaní knihy.</p>
-              <span class="mk-note">Odporúčanie, logá a citát použijeme len so súhlasom.</span>
+              <span class="mk-note">Súhlas sekcie s uvedením odporúčania aj Váš súhlas s citátom už máme.</span>
             </div>
             <figure class="hb-quote">
               <svg class="hb-quote-mark" viewBox="0 0 26 24" aria-hidden="true"><path d="M13 1.5c6.6 0 11.5 4.4 11.5 9.8S19.6 21 13 21c-1.3 0-2.6-.2-3.8-.5L3.5 23l1.6-4.8C2.9 16.4 1.5 14 1.5 11.3 1.5 5.9 6.4 1.5 13 1.5z" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><g fill="#FFFFFF"><circle cx="9.6" cy="7.6" r="1.3"/><circle cx="13" cy="7.6" r="1.3"/><circle cx="16.4" cy="7.6" r="1.3"/><circle cx="10.8" cy="11.2" r="1.3"/><circle cx="14.2" cy="11.2" r="1.3"/><circle cx="17.6" cy="11.2" r="1.3"/><circle cx="9.6" cy="14.8" r="1.3"/><circle cx="13" cy="14.8" r="1.3"/><circle cx="16.4" cy="14.8" r="1.3"/></g></svg>
               <blockquote>„Mnohí ľudia sa napriek ťažkej poruche sluchu naučili rozprávať.“</blockquote>
               <figcaption><b>Susann Schmid-Giovannini</b>auditívno-verbálna terapeutka, Švajčiarsko · citované na zadnej strane knihy</figcaption>
-              <span class="mk-note">Na stránke uvedieme citát v plnom znení zo zadnej strany obálky.</span>
+              <span class="mk-note">Na stránke uvedieme citát v plnom znení zo zadnej strany obálky. Ak nám pošlete fotografiu pani Schmid-Giovannini, pridáme ju k citátu.</span>
             </figure>
           </div>
         </section>
@@ -944,7 +946,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
               <h2 class="hb-h2">Parametre</h2>
               <dl>
                 <dt>Názov</dt><dd>Počujem – hovorím – komunikujem: od zvukov k&nbsp;reči cez sluch</dd>
-                <dt>Autorky</dt><dd>Mgr. Daniela Hudecová, PhD., Mgr. et Mgr. Silvia Adzimová, Mgr. Miroslava Petrík</dd>
+                <dt>Autorky</dt><dd>Mgr. Daniela Hudecová, PhD., Mgr. et Mgr. Silvia Adzimová, PhD., Mgr. Miroslava Petrík</dd>
                 <dt>Vydavateľ</dt><dd>Infra Slovakia</dd>
                 <dt>ISBN</dt><dd>978-80-89990-32-0</dd>
                 <dt>Formát</dt><dd>A4</dd>
@@ -965,6 +967,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
                 <details>
                   <summary>Je kniha pre rodičov, alebo pre odborníkov?</summary>
                   <p>Je napísaná pre rodičov a&nbsp;vedie ich krok za krokom. Program zároveň počíta s&nbsp;úzkou spoluprácou rodiny so surdopédom, logopédom alebo klinickým logopédom.</p>
+                </details>
+                <details>
+                  <summary>Moje dieťa počuje, ale málo rozpráva. Získam nejaké informácie v&nbsp;knihe?</summary>
+                  <p>Áno! Pri tvorbe stimulačného programu sme vychádzali z&nbsp;prác odborníkov, ktorí sa venujú vývinu jazyka u&nbsp;slovensky hovoriacich detí. Uvedený materiál teda kopíruje vývin sluchových a&nbsp;jazykových schopností počujúcich detí a&nbsp;inšpirácie v&nbsp;ňom nájdu aj rodičia, ktorí chcú podporiť jazykový vývin svojich počujúcich detí.</p>
                 </details>
                 <details>
                   <summary>Ako dlho program trvá?</summary>
@@ -988,7 +994,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
             <p class="hb-authors-line"><span>Daniela Hudecová</span><i aria-hidden="true">•</i><span>Silvia Adzimová</span><i aria-hidden="true">•</i><span>Miroslava Petrík</span></p>
           </div>
           <div class="hb-cta-actions">
-            <span class="hb-fill">cena: doplníme</span>
+            <span class="hb-price-value">39&nbsp;€ <small>s&nbsp;DPH</small></span>
             <a class="hb-btn" href="#hb-book" data-hb-buy>Vložiť do košíka</a>
           </div>
         </section>
@@ -1008,9 +1014,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <h2 id="mk-todo-h">Na dokončenie stránky potrebujeme</h2>
       <p>Návrh používa iba údaje z&nbsp;knihy a&nbsp;podklady, ktoré ste nám poslali. Ceny, recenzie ani odborné tvrdenia sme si nevymýšľali. Miesta označené „doplníme“ vyplníme podľa vašich podkladov.</p>
       <ol>
-        <li>Kontrolu textov na stránke.</li>
-        <li>Konečnú predajnú cenu a termín predaja.</li>
-        <li>Súhlas s uvedením citátu a odporúčania odbornej spoločnosti, prípadne ich logá.</li>
+        <li>Termín, od kedy môžeme knihu predávať.</li>
+        <li>Fotografiu pani Schmid-Giovannini k&nbsp;citátu, ak ju chcete na stránke, aj s&nbsp;menom autora fotografie.</li>
         <li>Ak máte krátke video o práci s knihou, pridáme ho aj s titulkami.</li>
       </ol>
     </div>
