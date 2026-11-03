@@ -503,12 +503,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hb-support-text { display: grid; gap: 16px; min-width: 0; align-content: start; }
 .hb-support-text p { max-width: 58ch; }
 .hb-support-text .hb-small { font-size: 0.95rem; color: var(--hb-ink-soft); }
+.hb-thanks { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.hb-thanks img { width: 150px; height: auto; flex: none; }
+.hb-thanks .hb-small { flex: 1 1 22ch; }
 .hb-quote {
   background: var(--hb-violet); color: var(--hb-white); border-radius: clamp(20px, 3cqi, 30px);
   padding: clamp(24px, 4cqi, 40px); display: grid; gap: 16px; align-content: start;
 }
 .hb-quote blockquote { margin: 0; font-family: var(--hb-serif); font-style: italic; font-size: clamp(1.45rem, 3.4cqi, 2.05rem); line-height: 1.3; text-wrap: balance; }
-.hb-quote figcaption { font-size: 0.95rem; color: #E3D6F2; }
+.hb-quote figcaption { font-size: 0.95rem; color: #E3D6F2; display: flex; align-items: center; gap: 14px; }
+.hb-quote figcaption img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: none; border: 2px solid #E3D6F2; }
 .hb-quote figcaption b { color: var(--hb-white); font-weight: 600; display: block; }
 .hb-quote-mark { width: 42px; height: 39px; }
 @container hb (min-width: 900px) {
@@ -927,14 +931,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
               <h2 class="hb-h2" id="hb-support-h">Odporúča sekcia klinickej logopédie</h2>
               <p>Publikáciu odporúča Sekcia klinickej logopédie Slovenskej spoločnosti pre otorinolaryngológiu a&nbsp;chirurgiu hlavy a&nbsp;krku SLS.</p>
               <p>Vydanie podporila SSO – Slovenská spoločnosť pre otorinolaryngológiu a&nbsp;chirurgiu hlavy a&nbsp;krku SLS. Vyjadrenie podpory podpísala MUDr.&nbsp;Katarína Obtulovičová, PhD., predsedníčka SSO.</p>
-              <p class="hb-small">Autorský tím ďakuje občianskemu združeniu ENT Studio za podporu pri vydaní knihy.</p>
+              <div class="hb-thanks">
+                <img src="assets/logo-entstudio.png" width="480" height="189" alt="ENT Studio" loading="lazy">
+                <p class="hb-small">Autorský tím ďakuje občianskemu združeniu ENT Studio za podporu pri vydaní knihy.</p>
+              </div>
               <span class="mk-note">Súhlas sekcie s uvedením odporúčania aj Váš súhlas s citátom už máme.</span>
             </div>
             <figure class="hb-quote">
               <svg class="hb-quote-mark" viewBox="0 0 26 24" aria-hidden="true"><path d="M13 1.5c6.6 0 11.5 4.4 11.5 9.8S19.6 21 13 21c-1.3 0-2.6-.2-3.8-.5L3.5 23l1.6-4.8C2.9 16.4 1.5 14 1.5 11.3 1.5 5.9 6.4 1.5 13 1.5z" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><g fill="#FFFFFF"><circle cx="9.6" cy="7.6" r="1.3"/><circle cx="13" cy="7.6" r="1.3"/><circle cx="16.4" cy="7.6" r="1.3"/><circle cx="10.8" cy="11.2" r="1.3"/><circle cx="14.2" cy="11.2" r="1.3"/><circle cx="17.6" cy="11.2" r="1.3"/><circle cx="9.6" cy="14.8" r="1.3"/><circle cx="13" cy="14.8" r="1.3"/><circle cx="16.4" cy="14.8" r="1.3"/></g></svg>
               <blockquote>„Mnohí ľudia sa napriek ťažkej poruche sluchu naučili rozprávať.“</blockquote>
-              <figcaption><b>Susann Schmid-Giovannini</b>auditívno-verbálna terapeutka, Švajčiarsko · citované na zadnej strane knihy</figcaption>
-              <span class="mk-note">Na stránke uvedieme citát v plnom znení zo zadnej strany obálky. Ak nám pošlete fotografiu pani Schmid-Giovannini, pridáme ju k citátu.</span>
+              <figcaption><img src="assets/schmid-giovannini.jpg" width="240" height="240" alt="" loading="lazy"><span><b>Susann Schmid-Giovannini</b>auditívno-verbálna terapeutka, Švajčiarsko · citované na zadnej strane knihy</span></figcaption>
+              <span class="mk-note">Na stránke uvedieme citát v plnom znení zo zadnej strany obálky.</span>
             </figure>
           </div>
         </section>
@@ -1015,7 +1022,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <p>Návrh používa iba údaje z&nbsp;knihy a&nbsp;podklady, ktoré ste nám poslali. Ceny, recenzie ani odborné tvrdenia sme si nevymýšľali. Miesta označené „doplníme“ vyplníme podľa vašich podkladov.</p>
       <ol>
         <li>Termín, od kedy môžeme knihu predávať.</li>
-        <li>Fotografiu pani Schmid-Giovannini k&nbsp;citátu, ak ju chcete na stránke, aj s&nbsp;menom autora fotografie.</li>
+        <li>Meno autora fotografie pani Schmid-Giovannini, ak ho treba pri fotke uviesť.</li>
         <li>Ak máte krátke video o práci s knihou, pridáme ho aj s titulkami.</li>
       </ol>
     </div>
