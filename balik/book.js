@@ -80,8 +80,8 @@
     var gallery = root.querySelector(".hb-gallery");
     var COVER = gallery ? gallery.getAttribute("data-hb-cover") : "";
     var shots = Array.prototype.slice.call(root.querySelectorAll("[data-hb-zoom]")).map(function (a) {
-      var cap = a.parentNode.querySelector("figcaption");
-      return { href: a.getAttribute("href"), cap: cap ? cap.textContent : "", link: a };
+      var cap = a.parentNode.querySelector("figcaption"), thumb = a.querySelector("img");
+      return { href: a.getAttribute("href"), thumb: thumb ? thumb.getAttribute("src") : "", cap: cap ? cap.textContent : "", link: a };
     });
     var dialog, fb, book, leaf, cast, pgL, pgR, fFront, fBack, capEl, cntEl;
     var ZMAX = 3, PADX = 12, PADY = 9; // PADX/PADY = vnútorný okraj .hb-fb-view
@@ -95,7 +95,8 @@
     function setFace(el, s, side) {
       el.classList.remove("is-cover", "is-inner");
       if (side < 0 || !shots[s]) { el.style.backgroundImage = "none"; return; }
-      el.style.backgroundImage = 'url("' + shots[s].href + '")';
+      // pod veľkou dvojstranou leží náhľad z galérie, kým sa veľký obrázok nenačíta
+      el.style.backgroundImage = 'url("' + shots[s].href + '")' + (shots[s].thumb ? ', url("' + shots[s].thumb + '")' : "");
       el.style.backgroundPosition = side ? "100% 0" : "0 0";
     }
     function render() {
